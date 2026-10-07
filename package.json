@@ -1,0 +1,11 @@
+{
+  "name": "teams-omarchy-integration",
+  "version": "0.1.1",
+  "description": "Live Omarchy colors for the native Teams for Linux client",
+  "license": "MIT",
+  "private": true,
+  "type": "commonjs",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": { "test": "node --test src/live-theme.test.cjs tests/*.test.cjs" },
+  "dependencies": { "@electron/asar": "^4.0.0" }
+}
