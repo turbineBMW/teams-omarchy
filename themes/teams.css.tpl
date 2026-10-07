@@ -2,6 +2,11 @@
 :root, body, .fui-FluentProvider, [class*="fui-FluentProvider"] {
   /* Foreground/background blend keeps dividers subtle in light and dark themes. */
   --omarchy-divider: color-mix(in srgb, {{ foreground }} 14%, {{ background }}) !important;
+  /* Text on the accent: black when the accent is light, white when it is dark.
+     The step is negative once OKLCH lightness passes 0.57, where black and white
+     text have equal WCAG contrast; clamp() turns it into 0 (black) or 1 (white).
+     The theme background is near-white in light themes, so it cannot be used. */
+  --omarchy-on-accent: oklch(from {{ accent }} clamp(0, calc((0.57 - l) * infinity), 1) 0 0) !important;
   --colorNeutralBackground1: {{ background }} !important;
   --colorNeutralBackground1Hover: {{ lighter_background }} !important;
   --colorNeutralBackground1Pressed: {{ selection_background }} !important;
@@ -37,7 +42,7 @@
   --colorNeutralForeground4: {{ dark_foreground }} !important;
   --colorNeutralForegroundDisabled: {{ muted }} !important;
   --colorNeutralForegroundInverted: {{ background }} !important;
-  --colorNeutralForegroundOnBrand: {{ background }} !important;
+  --colorNeutralForegroundOnBrand: var(--omarchy-on-accent) !important;
   --colorNeutralStroke1: {{ muted }} !important;
   --colorNeutralStroke1Hover: {{ accent }} !important;
   --colorNeutralStroke1Pressed: {{ accent }} !important;
@@ -77,13 +82,13 @@ html, body {
 
 /* Outgoing bubbles have their own component background, outside the token map.
    The accent is used as-is: blending it into the background turns warm accents
-   such as orange into brown. Text uses the on-brand color for contrast. */
+   such as orange into brown. Text is black or white to contrast with the accent. */
 .fui-FluentProvider .fui-ChatMyMessage__body {
   background-color: {{ accent }} !important;
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
 }
 .fui-FluentProvider .fui-ChatMyMessage__body a {
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
   text-decoration: underline !important;
 }
 
@@ -132,7 +137,7 @@ html, body {
 }
 [data-tid="calv2-sf-join"] {
   background-color: {{ accent }} !important;
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
 }
 [data-tid="calv2-sf-rsvp"],
 [data-tid="calv2-sf-show-or-hide-button"] {
@@ -145,7 +150,7 @@ html, body {
 [data-tid="slot-measurer"][data-app-name="schedulingform"][data-slot-name="header"]
   [data-tid="entity-header"] > div:first-child > div:first-child > div:first-child {
   background-color: {{ accent }} !important;
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
 }
 
 /* Teams hosts Calendar in an isolated Outlook frame with legacy Fabric CSS. */
@@ -186,7 +191,7 @@ html, body {
 [data-app-section="Surface_Month"] [data-tabid^="calendarSurfaceEntry_"]
   > [aria-hidden="true"] > div:first-child {
   background-color: {{ accent }} !important;
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
 }
 [data-app-section="Surface_Month"] [data-icon-name="HomeFilled"] {
   color: {{ accent }} !important;
@@ -222,7 +227,7 @@ html, body {
 [data-app-section="CalendarItemPeek"] .fui-SplitButton__menuButton,
 [data-app-section="CalendarItemPeek"] [data-ktp-target="true"] {
   background-color: {{ accent }} !important;
-  color: {{ background }} !important;
+  color: var(--omarchy-on-accent) !important;
   border-color: {{ accent }} !important;
 }
 [data-app-section="CalendarItemPeek"] div[role="presentation"] {

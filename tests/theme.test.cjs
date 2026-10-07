@@ -120,11 +120,35 @@ test('outgoing message bubbles use the true Omarchy accent', () => {
   const bubble = template.match(/\.fui-ChatMyMessage__body \{[\s\S]*?\n\}/);
   assert.ok(bubble, 'outgoing bubble rule is present');
   assert.match(bubble[0], /background-color: \{\{ accent \}\} !important;/);
-  assert.match(bubble[0], /color: \{\{ background \}\} !important;/);
+  assert.match(bubble[0], /color: var\(--omarchy-on-accent\) !important;/);
   // Blending the accent into the background turns orange accents into brown.
   assert.doesNotMatch(bubble[0], /color-mix/);
   assert.match(
     template,
-    /\.fui-ChatMyMessage__body a \{[\s\S]*?color: \{\{ background \}\} !important;/,
+    /\.fui-ChatMyMessage__body a \{[\s\S]*?color: var\(--omarchy-on-accent\) !important;/,
   );
+});
+
+test('text on the accent is black or white, chosen from the accent lightness', () => {
+  const template = fs.readFileSync(
+    path.join(__dirname, '../themes/teams.css.tpl'),
+    'utf8',
+  );
+
+  // A light theme's background is near-white, so it cannot be the text on a
+  // light accent such as orange; a lightness step picks black or white instead.
+  assert.match(
+    template,
+    /--omarchy-on-accent: oklch\(from \{\{ accent \}\} clamp\(0, calc\(\(0\.\d+ - l\) \* infinity\), 1\) 0 0\) !important;/,
+  );
+  assert.match(template, /--colorNeutralForegroundOnBrand: var\(--omarchy-on-accent\) !important;/);
+
+  // Every accent-filled surface uses it, never the theme background.
+  const flat = template.replace(/\{\{\s*(\w+)\s*\}\}/g, '<$1>');
+  const accentBlocks = flat.match(/\{[^{}]*\}/g).filter(block => block.includes('background-color: <accent>'));
+  assert.ok(accentBlocks.length >= 5, 'accent-filled surfaces are present');
+  for (const block of accentBlocks) {
+    assert.match(block, /color: var\(--omarchy-on-accent\) !important;/);
+    assert.doesNotMatch(block, /color: <background>/);
+  }
 });
