@@ -66,12 +66,16 @@ indicator, and explicitly targets the conversation and activity rails plus the
 conversation header, calendar chrome, event peek, and Activity meeting details.
 Calendar event/category colors, images, and embedded documents keep their
 original colors.
-Outgoing message bubbles use the theme's accent color as-is, with the theme's
-background color as text and underlined links, so they stay readable and distinct
-from received messages without keeping Teams' original purple. The accent is not
-blended into the background, because that turns warm accents such as orange into
-brown. This targets `.fui-ChatMyMessage__body`, whose separate component
-background bypasses our Fluent token overrides.
+Outgoing message bubbles use the theme's accent color as-is, with black or white
+text and underlined links, so they stay readable and distinct from received
+messages without keeping Teams' original purple. The text color is chosen in CSS
+from the accent's OKLCH lightness, so a light accent such as orange gets black
+text in both light and dark themes, and a dark accent gets white text. The same
+on-accent color is used for Fluent's on-brand foreground (primary buttons) and
+the calendar's accent surfaces. The accent is not blended into the background,
+because that turns warm accents such as orange into brown. This targets
+`.fui-ChatMyMessage__body`, whose separate component background bypasses our
+Fluent token overrides.
 Some hardcoded UI colors may need additional mappings.
 
 ## Source layout
