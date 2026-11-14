@@ -31,6 +31,8 @@ test('runtime bootstrap preserves original app path and reuses the cached build'
   const bootArchive = path.join(path.dirname(executable), 'resources/app.asar');
   const bootstrap = extractFile(bootArchive, 'index.cjs').toString();
   assert.ok(bootstrap.includes(`setAppPath(${JSON.stringify(archive)})`));
+  const hook = bootstrap.indexOf(JSON.stringify(path.join(integration, 'transparent-window.cjs')));
+  assert.ok(hook >= 0 && hook < bootstrap.indexOf('live-theme.cjs'), 'window hook loads before Teams');
   assert.ok(bootstrap.includes(JSON.stringify(path.join(integration, 'live-theme.cjs'))));
   assert.ok(bootstrap.includes(JSON.stringify(path.join(archive, 'app/index.js'))));
   assert.equal(JSON.parse(extractFile(bootArchive, 'package.json')).version, '2.20.1');

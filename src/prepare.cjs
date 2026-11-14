@@ -48,6 +48,7 @@ async function main() {
   }));
   await fs.writeFile(path.join(bootstrap, 'index.cjs'),
     `require('electron').app.setAppPath(${JSON.stringify(archive)});\n` +
+    `require(${JSON.stringify(path.join(__dirname, 'transparent-window.cjs'))});\n` +
     `require(${JSON.stringify(path.join(__dirname, 'live-theme.cjs'))});\n` +
     `require(${JSON.stringify(path.join(archive, pkg.main))});\n`);
   await createPackage(bootstrap, path.join(resources, 'app.asar'));

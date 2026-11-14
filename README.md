@@ -1,7 +1,8 @@
 # Teams + Omarchy
 
 Make Microsoft Teams follow your Omarchy palette, including the conversation
-list, activity feed, conversation header, and hosted calendar. Colors update
+list, activity feed, conversation header, hosted calendar, and the OneDrive and
+Copilot apps, with see-through sidebars and no title bar. Colors update
 within about one second without a page reload, so changing themes does not
 restart Teams or interrupt a call.
 
@@ -42,8 +43,9 @@ Another native installation location:
 
 Flatpak, Snap, AppImage, old Omarchy theme layouts, and customized XDG directory
 locations are not supported by this release. Tested interactively with Teams for
-Linux **2.20.1** on the author's Omarchy setup. Other layouts and future Teams
-versions need verification; Teams' HTML and color tokens can change.
+Linux **2.28.0** (and the colors alone with **2.20.1**) on the author's Omarchy
+setup. Other layouts and future Teams versions need verification; Teams' HTML and
+color tokens can change.
 
 ## How it works
 
@@ -55,10 +57,12 @@ versions need verification; Teams' HTML and color tokens can change.
    per Teams frame when its contents change. It reopens the path each time, so
    Omarchy replacing the entire theme directory does not break updates.
 
-The module only injects into HTTPS Teams origins and the exact
-`outlook.office.com/hosted/calendar/` path used by Teams. It does not theme
-Outlook mail, open a debugging port, send chat messages, or require a separate
-daemon. Your existing Teams profile and login are reused. Existing custom CSS
+The module only injects into HTTPS Teams origins and three apps Teams hosts in
+frames: the `outlook.office.com/hosted/calendar/` path, the OneDrive file browser
+(`*.sharepoint.com/…/_layouts/15/filebrowser.aspx`), and Copilot
+(`m365copilotapp.svc.cloud.microsoft`). Other SharePoint pages, such as documents
+opened in Teams, are left alone. It does not theme Outlook mail, open a debugging
+port, send chat messages, or require a separate daemon. Your existing Teams profile and login are reused. Existing custom CSS
 configuration is not edited.
 
 The integration maps Fluent UI colors, including the selected app-rail icon and
@@ -78,6 +82,50 @@ because that turns warm accents such as orange into brown. This targets
 Fluent token overrides.
 Some hardcoded UI colors may need additional mappings.
 
+### Window layout
+
+The template also rearranges the window, in the style of Bubo, Vmux and Rustle:
+
+- The app rail and chat list are see-through, so the desktop (and Hyprland's
+  blur, if enabled) shows behind them. The conversation, bubbles, menus and
+  dialogs stay opaque.
+- Teams' title bar is gone. The app-rail toggle, back and forward sit at the
+  left of the chat list header, with its title centred, and move with the list
+  when the rail is collapsed. *Settings and more* and your profile picture sit at
+  the foot of the app rail and hide with it. The Office app launcher is hidden.
+- Separators in the chat list are translucent too.
+- Search is hidden until you press Ctrl+Alt+E, then drops in at the top centre.
+
+Apps without a list beside the rail make room for the buttons in their own way:
+
+- **Activity** uses the same see-through list and centred title as Chat.
+- **Calls**: the left panel is see-through and runs up behind the header, with
+  Calls and its tabs on it.
+- **Calendar**: the toolbar and the navigation pane start below and after the
+  buttons. An opened event's title bar is as tall as the other headers, with
+  the title after the buttons.
+- **Store**: the header row starts after the buttons.
+- **OneDrive** and **Copilot** are pages from other Microsoft sites in a frame.
+  They get the palette too (OneDrive through its Fluent 8 palette and semantic
+  colours, Copilot through the Fluent tokens), see-through sidebars, and their
+  titles and own sidebar buttons after ours. Status colours (errors, warnings)
+  and file thumbnails keep their original colours.
+
+To allow this, `transparent-window.cjs` makes the launcher create the Teams main
+window with an alpha channel (Electron only allows this when a window is
+created). The window's other dialogs and pop-ups are unchanged. The buttons are
+pinned with fixed positions rather than by moving Teams' DOM, so their menus and
+shortcuts keep working. The collapsed rail is recognised by the toggle's English
+label (*Expand app bar*); in other languages the controls stay where they are
+with the rail expanded.
+
+Teams keeps hidden areas and app frames in the page, so each app's adjustments
+are matched to that app (for OneDrive and Copilot, by the Teams app ID of the
+visible frame). An app this does not know yet may have its own title under the
+buttons. Some rules match Microsoft's page structure rather than stable names,
+so a Teams, SharePoint, Outlook or Copilot update can undo one of them; the
+affected title then falls back under the buttons, and nothing else breaks.
+
 ## Source layout
 
 ```text
@@ -92,6 +140,7 @@ teams-omarchy/
 │   └── teams.css.tpl
 ├── src/
 │   ├── live-theme.cjs       # Live CSS replacement in Teams frames
+│   ├── transparent-window.cjs  # Create the main window with an alpha channel
 │   ├── prepare.cjs          # Build/cache the local Electron bootstrap
 │   ├── render.cjs           # Render the template without switching themes
 │   └── live-theme.test.cjs
@@ -99,7 +148,9 @@ teams-omarchy/
 │   └── setup.cjs            # Install, back up, restore, and uninstall
 └── tests/
     ├── prepare.test.cjs
-    └── setup.test.cjs
+    ├── setup.test.cjs
+    ├── theme.test.cjs
+    └── transparent-window.test.cjs
 ```
 
 ## Installed layout
@@ -111,6 +162,7 @@ teams-omarchy/
 ~/.local/share/applications/teams-for-linux.desktop
 ~/.local/share/teams-omarchy/
 ├── live-theme.cjs
+├── transparent-window.cjs
 ├── prepare.cjs
 ├── render.cjs
 ├── settings.json                              # Native Teams location
@@ -135,6 +187,17 @@ Edit `~/.config/omarchy/themed/teams.css.tpl`, then apply immediately:
 ```sh
 node ~/.local/share/teams-omarchy/render.cjs
 ```
+
+For example, set how see-through the sidebars are (a number from 0 to 1, not a
+percentage; it fades the background, not the text; `1` makes them opaque):
+
+```css
+:root { --teams-sidebar-opacity: 0.8; }
+```
+
+To keep Teams' own title bar, delete the *Window layout* section of the
+template. The *OneDrive and Copilot* section after it can stay; their sidebars
+then sit on an opaque background.
 
 No restart is needed for CSS edits or normal theme switches. Changes to the
 JavaScript integration itself require quitting and reopening Teams.
@@ -169,7 +232,8 @@ npm test
 ```
 
 Tests cover live replacement, atomic directory swaps, navigation, detached frames,
-origin filtering, dry runs, preserving existing files, uninstall, and rollback.
+origin filtering, the transparent-window hook, the template's layout rules, dry
+runs, preserving existing files, uninstall, and rollback.
 Installer tests use temporary directories and mocked package/build commands.
 
 The release archive contains only this integration's source. It excludes the

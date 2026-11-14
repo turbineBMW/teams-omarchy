@@ -117,7 +117,7 @@ function install({ home = os.homedir(), teamsDir, dryRun = false, runner = run, 
   const manifest = snapshot(paths);
   try {
     fs.mkdirSync(paths.integration, { recursive: true });
-    for (const file of ['live-theme.cjs', 'prepare.cjs', 'render.cjs', 'live-theme.test.cjs']) {
+    for (const file of ['live-theme.cjs', 'transparent-window.cjs', 'prepare.cjs', 'render.cjs', 'live-theme.test.cjs']) {
       fs.copyFileSync(path.join(project, 'src', file), path.join(paths.integration, file));
     }
     for (const file of ['package.json', 'package-lock.json', 'README.md']) {
