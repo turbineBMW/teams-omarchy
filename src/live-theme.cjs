@@ -16,8 +16,10 @@ function isThemedFrame(url) {
     if (u.protocol !== 'https:') return false;
     if (['teams.microsoft.com', 'teams.cloud.microsoft', 'teams.live.com'].some(
       host => u.hostname === host || u.hostname.endsWith('.' + host))) return true;
-    return u.hostname === 'outlook.office.com' &&
-      u.pathname.startsWith('/hosted/calendar/');
+    if (u.hostname === 'outlook.office.com') return u.pathname.startsWith('/hosted/calendar/');
+    // The OneDrive app's file browser and the Copilot app.
+    if (u.hostname.endsWith('.sharepoint.com')) return u.pathname.endsWith('/_layouts/15/filebrowser.aspx');
+    return u.hostname === 'm365copilotapp.svc.cloud.microsoft';
   } catch { return false; }
 }
 

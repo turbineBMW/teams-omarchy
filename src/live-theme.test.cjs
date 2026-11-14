@@ -54,10 +54,17 @@ test('replaces styles after atomic theme swaps; isolates frames and tolerates mi
     url: 'https://outlook.office.com/mail/',
     async executeJavaScript() { unrelatedExecutions++; },
   };
+  const hostedUrls = [];
+  const hosted = url => ({ url, async executeJavaScript() { hostedUrls.push(url); return true; } });
+  const oneDrive = hosted('https://contoso-my.sharepoint.com/personal/someone/_layouts/15/filebrowser.aspx');
+  const copilot = hosted('https://m365copilotapp.svc.cloud.microsoft/chat');
+  const sharePointDocument = hosted('https://contoso.sharepoint.com/sites/team/Shared%20Documents/notes.docx');
+  const copilotLookalike = hosted('https://m365copilotapp.svc.cloud.microsoft.example.org/chat');
   const content = new EventEmitter();
   content.isDestroyed = () => false;
   content.mainFrame = {
-    framesInSubtree: [frame, calendar, unrelated, unrelatedOutlook],
+    framesInSubtree: [frame, calendar, unrelated, unrelatedOutlook,
+      oneDrive, copilot, sharePointDocument, copilotLookalike],
   };
   const app = new EventEmitter();
   app.whenReady = () => Promise.resolve();
@@ -78,6 +85,7 @@ test('replaces styles after atomic theme swaps; isolates frames and tolerates mi
   assert.equal(calendarExecutions, 1);
   assert.equal(styles.size, 1);
   assert.equal(unrelatedExecutions, 0);
+  assert.deepEqual(hostedUrls, [oneDrive.url, copilot.url], 'only the OneDrive browser and Copilot app');
   tick(); await settle();
   assert.equal(executions, 1, 'unchanged CSS causes no reinjection');
   assert.equal(calendarExecutions, 1, 'unchanged calendar CSS causes no reinjection');
