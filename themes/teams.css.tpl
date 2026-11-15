@@ -21,6 +21,9 @@
   --colorNeutralBackground3Hover: {{ lighter_background }} !important;
   --colorNeutralBackground3Selected: {{ selection_background }} !important;
   --colorNeutralBackground4: {{ dark_background }} !important;
+  --colorNeutralBackground4Hover: {{ lighter_background }} !important;
+  --colorNeutralBackground4Pressed: {{ selection_background }} !important;
+  --colorNeutralBackground4Selected: {{ lighter_background }} !important;
   --colorNeutralBackground5: {{ darker_background }} !important;
   --colorNeutralBackground6: {{ lighter_background }} !important;
   --colorNeutralBackgroundStatic: {{ darker_background }} !important;
@@ -62,16 +65,56 @@
   --colorBrandBackground2Hover: color-mix(in srgb, {{ accent }} 24%, {{ background }}) !important;
   --colorBrandForeground1: {{ accent }} !important;
   --colorBrandForeground2: {{ accent }} !important;
-  --colorBrandForegroundLink: {{ blue }} !important;
-  --colorBrandForegroundLinkHover: {{ cyan }} !important;
-  --colorBrandForegroundLinkPressed: {{ blue }} !important;
+  --colorBrandBackground2Pressed: color-mix(in srgb, {{ accent }} 30%, {{ background }}) !important;
+  --colorBrandBackgroundStatic: {{ accent }} !important;
+  --colorBrandBackground3Static: color-mix(in srgb, {{ accent }} 85%, {{ foreground }}) !important;
+  --colorBrandBackground4Static: color-mix(in srgb, {{ accent }} 70%, {{ foreground }}) !important;
+  --colorBrandBackgroundInverted: {{ accent }} !important;
+  --colorBrandBackgroundInvertedHover: color-mix(in srgb, {{ accent }} 85%, {{ foreground }}) !important;
+  --colorBrandBackgroundInvertedPressed: color-mix(in srgb, {{ accent }} 80%, {{ background }}) !important;
+  --colorBrandBackgroundInvertedSelected: {{ accent }} !important;
+  --colorBrandForeground2Hover: {{ accent }} !important;
+  --colorBrandForeground2Pressed: {{ accent }} !important;
+  --colorBrandForegroundInverted: {{ accent }} !important;
+  --colorBrandForegroundInvertedHover: {{ accent }} !important;
+  --colorBrandForegroundInvertedPressed: {{ accent }} !important;
+  --colorBrandForegroundOnLight: {{ accent }} !important;
+  --colorBrandForegroundOnLightHover: {{ accent }} !important;
+  --colorBrandForegroundOnLightPressed: {{ accent }} !important;
+  --colorBrandForegroundOnLightSelected: {{ accent }} !important;
+  --colorNeutralForeground2BrandHover: {{ accent }} !important;
+  --colorNeutralForeground2BrandPressed: {{ accent }} !important;
+  --colorNeutralForeground2BrandSelected: {{ accent }} !important;
+  /* Links (including the "Shift+Enter" hint under the compose box) use the accent,
+     like every other brand foreground; hover deepens it towards the text colour. */
+  --colorBrandForegroundLink: {{ accent }} !important;
+  --colorBrandForegroundLinkHover: color-mix(in srgb, {{ accent }} 75%, {{ foreground }}) !important;
+  --colorBrandForegroundLinkPressed: color-mix(in srgb, {{ accent }} 75%, {{ foreground }}) !important;
+  --colorBrandForegroundLinkSelected: {{ accent }} !important;
   --colorBrandStroke1: {{ accent }} !important;
   --colorBrandStroke2: {{ accent }} !important;
+  --colorBrandStroke2Hover: {{ accent }} !important;
+  --colorBrandStroke2Pressed: {{ accent }} !important;
+  --colorBrandStroke2Contrast: {{ accent }} !important;
   --colorCompoundBrandBackground: {{ accent }} !important;
   --colorCompoundBrandBackgroundHover: {{ accent }} !important;
+  --colorCompoundBrandBackgroundPressed: {{ accent }} !important;
   --colorCompoundBrandForeground1: {{ accent }} !important;
   --colorCompoundBrandForeground1Hover: {{ accent }} !important;
+  --colorCompoundBrandForeground1Pressed: {{ accent }} !important;
+  /* Inputs and the compose box draw their focus underline with these; any state
+     left unset falls back to Teams' purple. */
   --colorCompoundBrandStroke: {{ accent }} !important;
+  --colorCompoundBrandStrokeHover: {{ accent }} !important;
+  --colorCompoundBrandStrokePressed: {{ accent }} !important;
+  --colorNeutralStrokeOnBrand: {{ background }} !important;
+  --colorNeutralStrokeOnBrand2: {{ background }} !important;
+  --colorNeutralStrokeOnBrand2Hover: {{ background }} !important;
+  --colorNeutralStrokeOnBrand2Pressed: {{ background }} !important;
+  --colorNeutralStrokeOnBrand2Selected: {{ background }} !important;
+  --colorTeamsBrand1Hover: {{ accent }} !important;
+  --colorTeamsBrand1Pressed: {{ accent }} !important;
+  --colorTeamsBrand1Selected: {{ accent }} !important;
   --colorStrokeFocus2: {{ accent }} !important;
 }
 html, body {
@@ -285,6 +328,15 @@ html, body {
   --colorNeutralStrokeSubtle: rgb(from {{ foreground }} r g b / 0.12) !important;
   --colorNeutralStrokeAlpha: rgb(from {{ foreground }} r g b / 0.12) !important;
   --colorNeutralStrokeAlpha2: rgb(from {{ foreground }} r g b / 0.12) !important;
+}
+/* The chat list paints its rows with Background4's states; over the see-through
+   list they are see-through too, so the selected row is not a solid block. */
+[data-tid="app-layout-area--mid-nav"],
+[data-tid="app-layout-area--sub-nav"],
+[data-tid="app-layout-area--start"] {
+  --colorNeutralBackground4Hover: rgb(from {{ lighter_background }} r g b / 0.35) !important;
+  --colorNeutralBackground4Pressed: rgb(from {{ selection_background }} r g b / 0.5) !important;
+  --colorNeutralBackground4Selected: rgb(from {{ lighter_background }} r g b / 0.55) !important;
 }
 
 /* The title bar collapses to nothing. Its buttons stay in the DOM (so their
