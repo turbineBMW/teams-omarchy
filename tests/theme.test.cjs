@@ -159,7 +159,8 @@ test('sidebars are tinted by --teams-sidebar-opacity; the conversation stays opa
     'utf8',
   );
 
-  assert.match(template, /:root \{ --teams-sidebar-opacity: 0\.8; \}/);
+  // Opaque unless the setting says otherwise (src/config.cjs).
+  assert.match(template, /:root \{ --teams-sidebar-opacity: 1; \}/);
   assert.match(
     template,
     /\[data-tid="app-bar-wrapper"\] > div \{[^}]*rgb\(from \{\{ darker_background \}\} r g b \/ var\(--teams-sidebar-opacity\)\)/s,

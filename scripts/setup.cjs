@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
+const config = require('../src/config.cjs');
 
 const project = path.resolve(__dirname, '..');
 const shellQuote = value => "'" + value.replaceAll("'", "'\\''") + "'";
@@ -110,14 +111,18 @@ function install({ home = os.homedir(), teamsDir, dryRun = false, runner = run, 
     console.log('Native Teams: ' + source);
     console.log('Would back up existing files and install:\n' + Object.entries(paths).filter(([k]) => k !== 'backups').map(([, p]) => '  ' + p).join('\n'));
     console.log('Would download locked npm dependencies, build the launcher, and render the palette. No files changed.');
+    console.log('Sidebar transparency setting: ' + config.configPath(home) + (exists(config.configPath(home)) ? ' (kept)' : ' (created)'));
     return paths;
   }
   checkRunning();
   runner('npm', ['--version'], { stdio: 'ignore' });
+  // Read before the backup moves it aside: the sidebar opacity it sets is
+  // carried into teams-omarchy's own config below.
+  const previousCss = exists(paths.css) ? fs.readFileSync(paths.css, 'utf8') : '';
   const manifest = snapshot(paths);
   try {
     fs.mkdirSync(paths.integration, { recursive: true });
-    for (const file of ['live-theme.cjs', 'transparent-window.cjs', 'prepare.cjs', 'render.cjs', 'live-theme.test.cjs']) {
+    for (const file of ['live-theme.cjs', 'config.cjs', 'transparent-window.cjs', 'prepare.cjs', 'render.cjs', 'live-theme.test.cjs']) {
       fs.copyFileSync(path.join(project, 'src', file), path.join(paths.integration, file));
     }
     for (const file of ['package.json', 'package-lock.json', 'README.md']) {
@@ -128,6 +133,9 @@ function install({ home = os.homedir(), teamsDir, dryRun = false, runner = run, 
     runner('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: paths.integration });
     runner(process.execPath, [path.join(paths.integration, 'prepare.cjs')]);
     for (const target of [paths.launcher, paths.desktop, paths.template, paths.css]) fs.mkdirSync(path.dirname(target), { recursive: true });
+    // Before the template and stylesheet are replaced: carry the sidebar
+    // opacity the current stylesheet sets into teams-omarchy's own config.
+    config.ensure(previousCss, home);
     fs.writeFileSync(paths.template, template);
     fs.writeFileSync(paths.css, css);
     fs.writeFileSync(paths.launcher, '#!/bin/bash\nset -euo pipefail\n' +

@@ -121,10 +121,12 @@ html, body {
   background-color: {{ background }} !important;
   color: {{ foreground }} !important;
 }
-/* See-through sidebars, like Bubo, Vmux and Rustle: a number from 0 to 1 (not a
-   percentage) that fades the app rail and chat list backgrounds, not their text.
-   The launcher creates the window with an alpha channel; at 1 nothing shows through. */
-:root { --teams-sidebar-opacity: 0.8; }
+/* See-through sidebars, like Bubo, Vmux and Rustle: fades the app rail and chat
+   list backgrounds, not their text. Not the theme's to set: teams-omarchy states
+   it after this stylesheet from ~/.config/teams-omarchy/config.json
+   (`node ~/.local/share/teams-omarchy/config.cjs on|off|70%`). This is only the
+   fallback; the launcher creates the window with an alpha channel. */
+:root { --teams-sidebar-opacity: 1; }
 ::selection {
   background: {{ selection_background }} !important;
   color: {{ foreground }} !important;

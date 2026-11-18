@@ -188,12 +188,23 @@ Edit `~/.config/omarchy/themed/teams.css.tpl`, then apply immediately:
 node ~/.local/share/teams-omarchy/render.cjs
 ```
 
-For example, set how see-through the sidebars are (a number from 0 to 1, not a
-percentage; it fades the background, not the text; `1` makes them opaque):
+### See-through sidebars
 
-```css
-:root { --teams-sidebar-opacity: 0.8; }
+The app rail and chat list can let the desktop show through (only their
+backgrounds fade, never the text). This is teams-omarchy's own setting in
+`~/.config/teams-omarchy/config.json`, not the theme's, so no template or theme
+changes it:
+
+```sh
+node ~/.local/share/teams-omarchy/config.cjs on      # turn it on
+node ~/.local/share/teams-omarchy/config.cjs 70%     # on, at 70% (or 0.7)
+node ~/.local/share/teams-omarchy/config.cjs off
+node ~/.local/share/teams-omarchy/config.cjs status
 ```
+
+Teams picks the change up within a second. Earlier versions set
+`--teams-sidebar-opacity` in the template; installing this one carries that
+value into the config first, so the sidebars look the same afterwards.
 
 To keep Teams' own title bar, delete the *Window layout* section of the
 template. The *OneDrive and Copilot* section after it can stay; their sidebars

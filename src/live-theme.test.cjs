@@ -102,12 +102,22 @@ test('replaces styles after atomic theme swaps; isolates frames and tolerates mi
   assert.equal(executions, 2);
   assert.equal(calendarExecutions, 2);
   assert.equal(styles.size, 1);
-  assert.equal(styles.get('omarchy-teams-live-theme').textContent, next);
+  const injected = styles.get('omarchy-teams-live-theme').textContent;
+  assert.ok(injected.startsWith(next), 'the theme comes first, as written');
+  assert.match(injected, /--teams-sidebar-opacity: 1\.00 !important;/, 'then the sidebar setting');
+
+  // The setting applies on the next tick, theme unchanged.
+  fs.mkdirSync(path.join(home, '.config/teams-omarchy'), { recursive: true });
+  fs.writeFileSync(path.join(home, '.config/teams-omarchy/config.json'),
+    JSON.stringify({ transparentSidebar: true, sidebarOpacity: 0.6 }));
+  tick(); await settle();
+  assert.equal(executions, 3);
+  assert.match(styles.get('omarchy-teams-live-theme').textContent, /--teams-sidebar-opacity: 0\.60 !important;/);
 
   write(':root { color: {{ foreground }}; }');
   tick(); await settle();
-  assert.equal(executions, 2, 'unrendered template is ignored');
-  assert.equal(calendarExecutions, 2, 'unrendered calendar template is ignored');
+  assert.equal(executions, 3, 'unrendered template is ignored');
+  assert.equal(calendarExecutions, 3, 'unrendered calendar template is ignored');
   app.emit('web-contents-created', {}, content);
   styles.clear();
   content.emit('dom-ready'); await settle();
