@@ -2,8 +2,10 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { app, webContents } = require('electron');
+const config = require('./config.cjs');
 
-const cssPath = path.join(os.homedir(), '.local/state/omarchy/current/theme/teams.css');
+const home = os.homedir();
+const cssPath = path.join(home, '.local/state/omarchy/current/theme/teams.css');
 const styleId = 'omarchy-teams-live-theme';
 let css = '';
 let reading = false;
@@ -71,10 +73,16 @@ async function refresh() {
   reading = true;
   try {
     // Reopen the path: Omarchy swaps the entire directory on theme changes.
-    const next = await fs.promises.readFile(cssPath, 'utf8');
-    if (next.trim() && !next.includes('{{') && next !== css) {
-      css = next;
-      console.info('[Omarchy theme] Loaded current palette');
+    const theme = await fs.promises.readFile(cssPath, 'utf8');
+    if (theme.trim() && !theme.includes('{{')) {
+      // The sidebar's opacity is teams-omarchy's own setting, stated after
+      // the theme's stylesheet so the theme can't override it. Read every
+      // tick, so `config.cjs on|off|70%` applies within a second.
+      const next = theme + config.css(config.ensure(theme, home));
+      if (next !== css) {
+        css = next;
+        console.info('[Omarchy theme] Loaded current palette');
+      }
     }
     for (const content of webContents.getAllWebContents()) applyContent(content);
   } catch (error) {

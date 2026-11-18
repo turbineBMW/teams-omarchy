@@ -52,6 +52,17 @@ test('install renders CSS; uninstall restores previous files and preserves edits
   assert.match(fs.readFileSync(path.join(f.paths.backups, disabled, 'template'), 'utf8'), /user customization/);
 });
 
+test('install carries the old stylesheet\'s sidebar opacity into the config first', t => {
+  const f = fixture(t);
+  fs.writeFileSync(f.paths.css, ':root { --teams-sidebar-opacity: 0.8; }');
+  install(f);
+  const saved = JSON.parse(fs.readFileSync(path.join(f.home, '.config/teams-omarchy/config.json'), 'utf8'));
+  assert.deepEqual(saved, { transparentSidebar: true, sidebarOpacity: 0.8 });
+  // The new stylesheet no longer sets it; the config does.
+  assert.match(fs.readFileSync(f.paths.css, 'utf8'), /--teams-sidebar-opacity: 1;/);
+  assert.ok(fs.existsSync(path.join(f.paths.integration, 'config.cjs')));
+});
+
 test('failed dependency installation rolls back existing files', t => {
   const f = fixture(t);
   fs.mkdirSync(f.paths.integration, { recursive: true });
